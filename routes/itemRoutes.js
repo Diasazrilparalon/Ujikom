@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const itemController = require('../controllers/itemController');
-const { authMiddleware, adminMiddleware } = require('../middlewares/authMiddleware');
 
-router.get('/itemall', itemController.getAllItems);  // Hanya user login
-router.post('/createitem', authMiddleware, adminMiddleware, itemController.createItem); // Hanya admin
-router.put('/:id', authMiddleware, adminMiddleware, itemController.updateStock);
-router.delete('/:id', authMiddleware, adminMiddleware, itemController.deleteItem);
-
+router.get('/', itemController.getAllItems);
+router.post('/', itemController.createItem);
+router.delete('/:id', itemController.deleteItem);
+router.get('/total-stock', itemController.getAllStocks);
+router.post('/add-stock', itemController.addStock); // Endpoint baru untuk menambah stok
+router.delete('/delete-stock', itemController.deleteStock); // Endpoint baru untuk menambah stok
 module.exports = router;

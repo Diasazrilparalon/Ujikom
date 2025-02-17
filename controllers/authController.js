@@ -38,10 +38,24 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) return res.status(401).json({ error: 'Email atau password salah' });
 
     // Buat JWT Token
-    const token = jwt.sign({ id_user: user.id_user, role: user.role }, process.env.SECRET_KEY,);
+    const token = jwt.sign({ id_user: user.id_user, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: '1d'
+    });
 
-    res.json({ message: 'Login berhasil', token });
+    // Simpan token di cookies
+    res.cookie('token', token, {
+      httpOnly: true, // Agar cookie tidak bisa diakses oleh JavaScript frontend
+      secure: false, // Set ke `true` jika pakai HTTPS
+      maxAge: 24 * 60 * 60 * 1000 // 1 hari
+    });
+
+    res.json({ message: 'Login berhasil' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+exports.logoutUser = (req, res) => {
+  res.clearCookie('token'); // Hapus cookie token
+  res.json({ message: 'Logout berhasil' });
 };

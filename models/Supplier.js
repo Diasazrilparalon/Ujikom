@@ -20,6 +20,5 @@ const Supplier = sequelize.define('Supplier', {
     allowNull: true 
   }
 }, { tableName: 'suppliers', timestamps: false });
-Item.belongsTo(Supplier, { foreignKey: 'id_supplier' });
-Supplier.hasMany(Item, { foreignKey: 'id_supplier' });
+
 module.exports = Supplier;
