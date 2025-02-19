@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, Sequelize } = require('sequelize');
 const sequelize = require('../config/database');
 const Item = require('./Item');
 const Supplier = require('./Supplier');
@@ -14,13 +14,13 @@ const Transaction = sequelize.define('Transaction', {
   id_barang: { 
     type: DataTypes.INTEGER, 
     allowNull: false,
-    references: { model: Item, key: 'id_barang' }, // Hubungan ke tabel items
+    references: { model: Item, key: 'id_barang' }, 
     onDelete: 'CASCADE'
   },
   id_gudang: { 
     type: DataTypes.INTEGER, 
     allowNull: false,
-    references: { model: Warehouse, key: 'id_gudang' }, // Hubungan ke tabel warehouses
+    references: { model: Warehouse, key: 'id_gudang' }, 
     onDelete: 'CASCADE'
   },
   tipe_transaksi: { 
@@ -34,7 +34,7 @@ const Transaction = sequelize.define('Transaction', {
   id_supplier: { 
     type: DataTypes.INTEGER, 
     allowNull: true,  
-    references: { model: Supplier, key: 'id_supplier' }, // Hubungan ke tabel suppliers
+    references: { model: Supplier, key: 'id_supplier' }, 
     onDelete: 'SET NULL'
   },
   konsumen: { 
@@ -44,24 +44,30 @@ const Transaction = sequelize.define('Transaction', {
   id_user: { 
     type: DataTypes.INTEGER, 
     allowNull: false, 
-    references: { model: User, key: 'id_user' }, // Hubungan ke tabel users
+    references: { model: User, key: 'id_user' }, 
     onDelete: 'CASCADE'
+  },
+  tanggal: { 
+    type: DataTypes.DATE,  
+    allowNull: false,
+    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
   }
-}, { tableName: 'transactions', timestamps: false });
+  
+}, { 
+  tableName: 'transactions', 
+  timestamps: false 
+});
 
-// Hubungan antara Transactions dan Item
+// Hubungan dengan model lain
 Transaction.belongsTo(Item, { foreignKey: 'id_barang' });
 Item.hasMany(Transaction, { foreignKey: 'id_barang' });
 
-// Hubungan antara Transactions dan Warehouse
 Transaction.belongsTo(Warehouse, { foreignKey: 'id_gudang' });
 Warehouse.hasMany(Transaction, { foreignKey: 'id_gudang' });
 
-// Hubungan antara Transactions dan Supplier
 Transaction.belongsTo(Supplier, { foreignKey: 'id_supplier' });
 Supplier.hasMany(Transaction, { foreignKey: 'id_supplier' });
 
-// Hubungan antara Transactions dan User (Pegawai yang melakukan transaksi)
 Transaction.belongsTo(User, { foreignKey: 'id_user' });
 User.hasMany(Transaction, { foreignKey: 'id_user' });
 

@@ -18,3 +18,8 @@ exports.getAllWarehouses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.countgudang = async (req, res) => {
+  const count = await Warehouse.count();
+  res.json({ count });
+};

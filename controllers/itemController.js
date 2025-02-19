@@ -30,16 +30,37 @@ exports.getAllItems = async (req, res) => {
 };
 
 
-// Tambah barang baru
+
 exports.createItem = async (req, res) => {
   try {
-    const { nama_barang, kategori, batas_minimum } = req.body;
-    const newItem = await Item.create({ nama_barang, kategori, batas_minimum });
-    res.json(newItem);
+    const { nama_barang, kategori, batas_minimum, id_supplier } = req.body;
+
+    // Cek apakah semua data yang dibutuhkan ada
+    if (!nama_barang || !kategori || !id_supplier) {
+      return res.status(400).json({ error: 'Nama barang, kategori, dan id_supplier wajib diisi' });
+    }
+
+    // Cek apakah kategori yang dikirim valid
+    const validKategori = ['Elektronik', 'Furniture', 'Lainnya'];
+    if (!validKategori.includes(kategori)) {
+      return res.status(400).json({ error: `Kategori harus salah satu dari: ${validKategori.join(', ')}` });
+    }
+
+    // Cek apakah supplier dengan id_supplier ada
+    const supplier = await Supplier.findByPk(id_supplier);
+    if (!supplier) {
+      return res.status(404).json({ error: 'Supplier tidak ditemukan' });
+    }
+
+    // Buat item baru
+    const newItem = await Item.create({ nama_barang, kategori, batas_minimum, id_supplier });
+
+    res.status(201).json({ message: 'Barang berhasil ditambahkan', newItem });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Hapus barang
 exports.deleteItem = async (req, res) => {
@@ -77,6 +98,7 @@ exports.addStock = async (req, res) => {
 exports.getAllStocks = async (req, res) => {
   try {
     const stocks = await Stock.findAll({
+      attributes: ['id_stock', 'jumlah_stok'], // Tambahkan id_stock & jumlah_stok
       include: [
         {
           model: Item,
@@ -88,11 +110,13 @@ exports.getAllStocks = async (req, res) => {
         }
       ]
     });
+
     res.json(stocks);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.deleteStock = async (req, res) => {
   try {
@@ -103,3 +127,12 @@ exports.deleteStock = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.countitem = async (req, res) => {
+  const count = await Item.count();
+  res.json({ count });
+};
+exports.countstock= async (req, res) => {
+  const totalStock = await Stock.sum("jumlah_stok");
+  res.json({ totalStock });
+}

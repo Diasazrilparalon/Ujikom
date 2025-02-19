@@ -7,5 +7,7 @@ router.post('/', itemController.createItem);
 router.delete('/:id', itemController.deleteItem);
 router.get('/total-stock', itemController.getAllStocks);
 router.post('/add-stock', itemController.addStock); // Endpoint baru untuk menambah stok
-router.delete('/delete-stock', itemController.deleteStock); // Endpoint baru untuk menambah stok
+router.delete('/delete-stock', itemController.deleteStock); // Endpoint baru untuk menambah stok\
+router.get('/count',itemController.countitem);
+router.get('/countstok',itemController.countstock);
 module.exports = router;

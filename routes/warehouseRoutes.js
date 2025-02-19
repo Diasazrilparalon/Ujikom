@@ -4,6 +4,7 @@ const warehouseController = require('../controllers/warehouseController');
 const { authMiddleware, adminMiddleware } = require('../middlewares/authMiddleware');
 
 router.post('/', authMiddleware, adminMiddleware, warehouseController.createWarehouse);
-router.get('/', authMiddleware, warehouseController.getAllWarehouses);
+router.get('/', warehouseController.getAllWarehouses);
+router.get('/count', warehouseController.countgudang);
 
 module.exports = router;
