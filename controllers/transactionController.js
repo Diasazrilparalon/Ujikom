@@ -133,22 +133,29 @@ exports.deleteTransaction = async (req, res) => {
   }
 };
 exports.recenttransaction = async (req, res) => {
-  const transactions = await Transaction.findAll({
-    limit: 5,
-    order: [["tanggal", "DESC"]],
-    include: {
-      model: Item,
-      attributes: ["nama_barang"],
-    },
-  });
+  try {
+    const transactions = await Transaction.findAll({
+      limit: 5,
+      order: [["tanggal", "DESC"]],
+      attributes: ["id_transaksi", "tipe_transaksi", "jumlah", "tanggal"], // Tambahkan tipe_transaksi
+      include: {
+        model: Item,
+        attributes: ["nama_barang"],
+      },
+    });
 
-  res.json({
-    count: transactions.length,
-    transactions: transactions.map((trx) => ({
-      id_transaksi: trx.id_transaksi,
-      nama_barang: trx.Item.nama_barang,
-      jumlah: trx.jumlah,
-      tanggal: trx.tanggal,
-    })),
-  });
+    res.json({
+      count: transactions.length,
+      transactions: transactions.map((trx) => ({
+        id_transaksi: trx.id_transaksi,
+        nama_barang: trx.Item ? trx.Item.nama_barang : "Barang Tidak Ditemukan",
+        tipe_transaksi: trx.tipe_transaksi, // Tambahkan tipe_transaksi
+        jumlah: trx.jumlah,
+        tanggal: trx.tanggal,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching recent transactions:", error);
+    res.status(500).json({ error: "Gagal mengambil transaksi terbaru" });
+  }
 };

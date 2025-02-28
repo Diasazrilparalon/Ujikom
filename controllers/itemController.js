@@ -3,7 +3,8 @@ const Item = require('../models/Item');
 const Stock = require('../models/Stock');
 const Warehouse = require('../models/Warehouse');
 const Supplier = require('../models/Supplier');
-
+const Transaction =require('../models/Transaction')
+const { Op } = require("sequelize");  // ⬅ Tambahkan ini
 exports.getAllItems = async (req, res) => {
   try {
     const items = await Item.findAll({
@@ -136,3 +137,31 @@ exports.countstock= async (req, res) => {
   const totalStock = await Stock.sum("jumlah_stok");
   res.json({ totalStock });
 }
+exports.getTopSoldItems = async (req, res) => {
+  try {
+    // Ambil tanggal 7 hari terakhir
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const topSold = await Transaction.findAll({
+      attributes: [
+        "id_barang",
+        [Transaction.sequelize.fn("SUM", Transaction.sequelize.col("jumlah")), "total_terjual"],
+        [Transaction.sequelize.fn("MAX", Transaction.sequelize.col("tanggal")), "last_sold_date"], // Ganti createdAt dengan tanggal
+      ],
+      where: {
+        tipe_transaksi: "Keluar", // Hanya transaksi 'Keluar'
+        tanggal: { [Op.gte]: oneWeekAgo }, // Ganti createdAt dengan tanggal
+      },
+      include: [{ model: Item, attributes: ["nama_barang"] }], // Join ke tabel Item untuk mendapatkan nama_barang
+      group: ["id_barang", "Item.id_barang"],
+      order: [[Transaction.sequelize.fn("SUM", Transaction.sequelize.col("jumlah")), "DESC"]], // Urutkan dari yang paling banyak terjual
+      limit: 10, // Ambil 10 barang teratas
+    });
+
+    res.json({ topSold });
+  } catch (error) {
+    console.error("Error fetching top sold items:", error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
+  }
+};

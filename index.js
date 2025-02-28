@@ -37,7 +37,7 @@ app.use('/api', authRoutes);
 sequelize.authenticate()
   .then(async () => {
      console.log('Connection success');
-      // await transactions.sync({ alter: true });
+      //await User.sync({ alter: true });
    
   })
 // Start server

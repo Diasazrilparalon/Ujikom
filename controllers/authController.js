@@ -24,37 +24,44 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-// Login User
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Cek apakah user ada
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ error: 'Email atau password salah' });
+    if (!user) return res.status(401).json({ error: "Email atau password salah" });
 
     // Bandingkan password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: 'Email atau password salah' });
+    if (!isMatch) return res.status(401).json({ error: "Email atau password salah" });
 
     // Buat JWT Token
-    const token = jwt.sign({ id_user: user.id_user, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1d'
-    });
+    const token = jwt.sign(
+      { id_user: user.id_user, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     // Simpan token di cookies
-    res.cookie('token', token, {
-      httpOnly: true, // Agar cookie tidak bisa diakses oleh JavaScript frontend
-      secure: false, // Set ke `true` jika pakai HTTPS
-      maxAge: 24 * 60 * 60 * 1000 // 1 hari
+    res.cookie("token", token, {
+      httpOnly: true, // Cookie hanya bisa diakses oleh server
+      secure: process.env.NODE_ENV === "production", // `true` di production (HTTPS)
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Perlu `None` untuk domain berbeda
+      maxAge: 24 * 60 * 60 * 1000, // 1 hari
     });
 
-    res.json({ message: 'Login berhasil' });
+    // Kirim token & role ke frontend
+    res.json({
+      message: "Login berhasil",
+      token, // Kirim token agar frontend bisa menyimpannya jika perlu
+      role: user.role, // Kirim role untuk navigasi frontend
+    });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 exports.logoutUser = (req, res) => {
   res.clearCookie('token'); // Hapus cookie token
   res.json({ message: 'Logout berhasil' });

@@ -10,4 +10,5 @@ router.post('/add-stock', itemController.addStock); // Endpoint baru untuk menam
 router.delete('/delete-stock', itemController.deleteStock); // Endpoint baru untuk menambah stok\
 router.get('/count',itemController.countitem);
 router.get('/countstok',itemController.countstock);
+router.get("/top-sold", itemController.getTopSoldItems); // Endpoint untuk barang terlaris
 module.exports = router;
